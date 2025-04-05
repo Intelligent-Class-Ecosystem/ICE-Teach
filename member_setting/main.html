@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账户管理系统</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --danger-color: #dc2626;
+            --success-color: #16a34a;
+            --background-color: #f3f4f6;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: var(--background-color);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-filter {
+            padding: 1rem;
+            background: #f8fafc;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .badge.admin { background: #bfdbfe; color: #1e40af; }
+        .badge.academic { background: #bae6fd; color: #075985; }
+        .badge.head-teacher { background: #a7f3d0; color: #065f46; }
+        .badge.teacher { background: #fde68a; color: #92400e; }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn.edit {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .action-btn.delete {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .password-strength {
+            height: 4px;
+            background: #e2e8f0;
+            margin-top: 0.5rem;
+            border-radius: 2px;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .data-table thead {
+                display: none;
+            }
+
+            .data-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid #e2e8f0;
+                border-radius: 0.5rem;
+            }
+
+            .data-table td {
+                display: grid;
+                grid-template-columns: 6rem auto;
+                gap: 1rem;
+                padding: 0.75rem;
+            }
+
+            .data-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #64748b;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-users-cog"></i> 账户管理系统</h1>
+            <div class="user-info">
+                <span>当前用户：管理员</span>
+                <button class="action-btn logout"><i class="fas fa-sign-out-alt"></i> 退出</button>
+            </div>
+        </div>
+
+        <div class="search-filter">
+            <div class="search-box">
+                <input type="text" placeholder="搜索用户名..." class="search-input">
+            </div>
+            <button class="action-btn primary" onclick="showAddModal()">
+                <i class="fas fa-plus"></i> 新建账户
+            </button>
+        </div>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>用户名</th>
+                    <th>权限等级</th>
+                    <th>最后登录</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 动态加载数据 -->
+                <tr>
+                    <td data-label="用户名">admin</td>
+                    <td data-label="权限等级"><span class="badge admin">管理员</span></td>
+                    <td data-label="最后登录">2023-07-20 14:30</td>
+                    <td data-label="创建时间">2023-01-01</td>
+                    <td data-label="操作">
+                        <button class="action-btn edit"><i class="fas fa-edit"></i> 编辑</button>
+                        <button class="action-btn delete"><i class="fas fa-trash"></i> 删除</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 账户操作模态框 -->
+    <div class="modal" id="accountModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <h2 class="modal-title"><i class="fas fa-user-edit"></i> 账户信息</h2>
+            
+            <form id="accountForm" class="form-grid">
+                <input type="hidden" id="userId">
+                
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-user"></i> 用户名</label>
+                    <input type="text" id="username" required>
+                    <div class="error-msg" id="usernameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> 密码</label>
+                    <input type="password" id="password" required>
+                    <div class="password-strength">
+                        <div class="strength-bar" id="strengthBar"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword"><i class="fas fa-lock"></i> 确认密码</label>
+                    <input type="password" id="confirmPassword" required>
+                    <div class="error-msg" id="passwordError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="role"><i class="fas fa-shield-alt"></i> 权限等级</label>
+                    <select id="role" class="role-select" required>
+                        <option value="admin">最高权限管理员</option>
+                        <option value="academic">教务人员</option>
+                        <option value="head-teacher">班主任</option>
+                        <option value="teacher">任课老师</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="action-btn primary">
+                        <i class="fas fa-save"></i> 保存更改
+                    </button>
+                    <button type="button" class="action-btn" onclick="closeModal()">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 初始化代码...
+    </script>
+</body>
+</html>
