@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>冰核智慧课堂 - 考试预约</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            display: flex;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 60px;
+            height: 100vh;
+            background: #1a73e8;
+            padding: 20px 10px;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .sidebar:hover {
+            width: 240px;
+        }
+
+        .menu-item {
+            position: relative;
+            color: #fff;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .menu-item:hover {
+            background: #1557b0;
+        }
+
+        .menu-item i {
+            width: 30px;
+            font-size: 16px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .submenu {
+            position: absolute;
+            left: 0;
+            top: 100%;
+            width: 100%;
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            display: none;
+            padding: 8px 0;
+        }
+
+        .menu-item:hover .submenu {
+            display: block;
+        }
+
+        .submenu-item {
+            color: #606266;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .submenu-item:hover {
+            background: #f5f7fa;
+            color: #1a73e8;
+        }
+
+        .account-area {
+            margin-top: auto;
+            position: relative;
+            padding: 20px 0;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .account-popup {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: #fff;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            min-width: 200px;
+        }
+
+        .account-popup.show {
+            display: block;
+        }
+
+        .popup-item {
+            color: #606266;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .content {
+            flex: 1;
+            margin-left: 60px;
+            min-height: 100vh;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: margin 0.3s ease;
+        }
+
+        .booking-form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #606266;
+            font-weight: 500;
+        }
+
+        input[type="date"],
+        input[type="time"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #1557b0;
+        }
+
+        .notification-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 2000;
+            text-align: center;
+            width: 320px;
+        }
+
+        .notification-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .notification-icon {
+            font-size: 40px;
+            color: #1a73e8;
+        }
+
+        .confirm-btn {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .confirm-btn:hover {
+            background: #1557b0;
+        }
+
+        .error-text {
+            color: #ff4d4f !important;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <!-- 侧边栏菜单 -->
+        <div class="menu-item">
+            <i class="fas fa-chart-line"></i>
+            总览
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='dashboard.html'">总览面板</div>
+                <div class="submenu-item" onclick="location.href='system-status.html'">系统状态</div>
+                <div class="submenu-item" onclick="location.href='dev-tools.html'">运维工具</div>
+            </div>
+        </div>
+
+        <div class="menu-item">
+            <i class="fas fa-book-open"></i>
+            课程
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='timetable.html'">课程表</div>
+                <div class="submenu-item" onclick="location.href='adjust-course.html'">临时调课</div>
+                <div class="submenu-item" onclick="location.href='course-mgmt.html'">课程管理</div>
+            </div>
+        </div>
+
+        <div class="menu-item">
+            <i class="fas fa-edit"></i>
+            考试
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='exam-booking.html'">考试预约</div>
+                <div class="submenu-item" onclick="location.href='exam-status.html'">考试状态</div>
+                <div class="submenu-item" onclick="location.href='score-analysis.html'">成绩分析</div>
+            </div>
+        </div>
+
+        <div class="menu-item">
+            <i class="fas fa-video"></i>
+            监控
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='whiteboard-cam.html'">白板摄像头</div>
+                <div class="submenu-item" onclick="location.href='live-screen.html'">实时屏幕</div>
+                <div class="submenu-item" onclick="location.href='remote-ops.html'">远程操作</div>
+            </div>
+        </div>
+
+        <div class="menu-item settings-menu" onclick="location.href='settings.html'">
+            <i class="fas fa-cog"></i>
+            设置
+        </div>
+
+        <!-- 账号区域 -->
+        <div class="account-area" onmouseenter="showAccountPopup()" onmouseleave="hideAccountPopup()">
+            <div class="menu-item">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                    <div>当前账号</div>
+                    <div class="account-name">Loading...</div>
+                </div>
+            </div>
+            <div class="account-popup" id="accountPopup">
+                <div class="popup-item">用户名：<span id="popup-username">admin</span></div>
+                <div class="popup-item">权限：<span id="popup-role">超级管理员</span></div>
+                <div class="popup-item">身份：<span id="popup-identity">教师</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="booking-form">
+            <h2 style="margin-bottom: 20px; color: #1a73e8;">考试预约</h2>
+            <form id="examForm">
+                <div class="form-group">
+                    <label>考试日期：</label>
+                    <input type="date" id="examDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>开始时间：</label>
+                    <input type="time" id="startTime" required>
+                </div>
+
+                <div class="form-group">
+                    <label>结束时间：</label>
+                    <input type="time" id="endTime" required>
+                </div>
+
+                <button type="submit">预约考试</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 成功提示模态框 -->
+    <div id="successNotification" class="notification-modal">
+        <div class="notification-content">
+            <i class="fas fa-check-circle notification-icon"></i>
+            <h3>预约完成</h3>
+            <button class="confirm-btn" onclick="closeNotification()">确认</button>
+        </div>
+    </div>
+
+    <script>
+        // 账号信息弹窗控制
+        let accountPopupTimer;
+        const accountPopup = document.getElementById('accountPopup');
+
+        function showAccountPopup() {
+            clearTimeout(accountPopupTimer);
+            accountPopup.classList.add('show');
+        }
+
+        function hideAccountPopup() {
+            accountPopupTimer = setTimeout(() => {
+                accountPopup.classList.remove('show');
+            }, 300);
+        }
+
+        // 考试预约处理
+        document.getElementById('examForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formatTime = (dateStr, timeStr) => {
+                const [year, month, day] = dateStr.split('-');
+                const [hours, minutes] = timeStr.split(':');
+                return `${year}${month}${day}${hours}${minutes}00`;
+            };
+
+            const record = `${formatTime(examDate.value, startTime.value)}-${formatTime(examDate.value, endTime.value)}`;
+
+            try {
+                // 实际使用时取消注释以下代码
+                /*
+                const response = await fetch('/save-exam.php', {
+                    method: 'POST',
+                    body: new URLSearchParams({ time: record })
+                });
+                
+                if (!response.ok) throw new Error('请求失败');
+                const data = await response.json();
+                
+                if (data.status !== 'success') throw new Error(data.message || '未知错误');
+                */
+
+                // 模拟成功响应
+                showNotification();
+                examForm.reset();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`预约失败: ${error.message}`);
+            }
+        });
+
+        // 提示窗控制
+        function showNotification() {
+            const modal = document.getElementById('successNotification');
+            modal.style.display = 'block';
+        }
+
+        function closeNotification() {
+            const modal = document.getElementById('successNotification');
+            modal.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

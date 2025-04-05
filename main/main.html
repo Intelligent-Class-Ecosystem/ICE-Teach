@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>系统总览 - 冰核智慧课堂控制台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            display: flex;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 60px;
+            height: 100vh;
+            background: #1a73e8;
+            padding: 20px 10px;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .sidebar:hover {
+            width: 240px;
+        }
+
+        .menu-item {
+            position: relative;
+            color: #fff;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .menu-item:hover {
+            background: #1557b0;
+        }
+
+        .menu-item i {
+            width: 30px;
+            font-size: 16px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        /* 二级菜单样式 */
+        .submenu {
+            position: absolute;
+            left: 0;
+            top: 100%;
+            width: 100%;
+            background: #fff;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            padding: 8px 0;
+            z-index: 1001;
+        }
+
+        .menu-item:hover .submenu {
+            display: block;
+        }
+
+        .submenu-item {
+            color: #606266;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .submenu-item:hover {
+            background: #f5f7fa;
+            color: #1a73e8;
+        }
+
+        /* 账号信息样式 */
+        .account-area {
+            margin-top: auto;
+            position: relative;
+            padding: 20px 0;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .account-popup {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            width: 100%;
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            padding: 15px;
+            color: #333;
+            z-index: 1002;
+        }
+
+        .account-area:hover .account-popup {
+            display: block;
+        }
+
+        .popup-item {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        /* 内容区域样式 */
+        .content {
+            flex: 1;
+            margin-left: 60px;
+            min-height: 100vh;
+            background: #f0f2f5;
+            padding: 30px;
+            transition: margin 0.3s ease;
+        }
+
+        .sidebar:hover ~ .content {
+            margin-left: 240px;
+        }
+
+        /* 状态监控样式 */
+        .status-container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .status-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .metric-icon {
+            font-size: 24px;
+            color: #1a73e8;
+            margin-right: 10px;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background: #f0f2f5;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-value {
+            height: 100%;
+            background: #1a73e8;
+            transition: width 0.5s ease;
+        }
+
+        .version-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        /* 客户端列表样式 */
+        .client-table {
+            width: 100%;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            background: #f8f9fa;
+            padding: 12px 20px;
+            font-weight: bold;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            padding: 12px 20px;
+            border-bottom: 1px solid #eee;
+            transition: background 0.3s;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .table-row:hover {
+            background: #f8f9fa;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online {
+            background: #52c41a;
+        }
+
+        .status-offline {
+            background: #ff4d4f;
+        }
+
+        .error-text {
+            color: #ff4d4f !important;
+            font-weight: bold;
+        }
+
+        @media (max-width: 1200px) {
+            .table-header,
+            .table-row {
+                grid-template-columns: repeat(3, 1fr);
+                grid-auto-rows: minmax(40px, auto);
+            }
+            
+            span:nth-child(n+4) {
+                grid-row: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="menu-item">
+            <i class="fas fa-chart-line"></i>
+            总览
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='dashboard.html'">总览面板</div>
+                <div class="submenu-item" onclick="location.href='system-status.html'">系统状态</div>
+                <div class="submenu-item" onclick="location.href='dev-tools.html'">运维工具</div>
+            </div>
+        </div>
+
+        <div class="menu-item">
+            <i class="fas fa-book-open"></i>
+            课程
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='timetable.html'">课程表</div>
+                <div class="submenu-item" onclick="location.href='adjust-course.html'">临时调课</div>
+                <div class="submenu-item" onclick="location.href='course-mgmt.html'">课程管理</div>
+            </div>
+        </div>
+
+        <div class="menu-item">
+            <i class="fas fa-edit"></i>
+            考试
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='exam-booking.html'">考试预约</div>
+                <div class="submenu-item" onclick="location.href='exam-status.html'">考试状态</div>
+                <div class="submenu-item" onclick="location.href='score-analysis.html'">成绩分析</div>
+            </div>
+        </div>
+
+        <div class="menu-item">
+            <i class="fas fa-video"></i>
+            监控
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='whiteboard-cam.html'">白板摄像头</div>
+                <div class="submenu-item" onclick="location.href='live-screen.html'">实时屏幕</div>
+                <div class="submenu-item" onclick="location.href='remote-ops.html'">远程操作</div>
+            </div>
+        </div>
+
+        <div class="menu-item settings-menu" onclick="location.href='settings.html'">
+            <i class="fas fa-cog"></i>
+            设置
+        </div>
+
+        <!-- 账号区域 -->
+        <div class="account-area">
+            <div class="menu-item">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                    <div>当前账号</div>
+                    <div class="account-name">Loading...</div>
+                </div>
+            </div>
+            <div class="account-popup">
+                <div class="popup-item">用户名：<span id="popup-username">Loading...</span></div>
+                <div class="popup-item">权限：<span id="popup-role">Loading...</span></div>
+                <div class="popup-item">身份：<span id="popup-identity">Loading...</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容区 -->
+    <div class="content">
+        <div class="status-container">
+            <!-- 系统状态卡片 -->
+            <div class="status-card">
+                <div class="metric-header">
+                    <i class="fas fa-microchip metric-icon"></i>
+                    <h3>CPU利用率</h3>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-value" id="cpu-progress" style="width: 0%"></div>
+                </div>
+                <div class="metric-value" id="cpu-value">正在加载...</div>
+            </div>
+
+            <div class="status-card">
+                <div class="metric-header">
+                    <i class="fas fa-memory metric-icon"></i>
+                    <h3>内存利用率</h3>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-value" id="memory-progress" style="width: 0%"></div>
+                </div>
+                <div class="metric-value" id="memory-value">正在加载...</div>
+            </div>
+
+            <div class="status-card">
+                <div class="metric-header">
+                    <i class="fas fa-code-branch metric-icon"></i>
+                    <h3>系统版本</h3>
+                </div>
+                <div class="version-info">
+                    <div>内核版本：<span id="kernel-version">1.0.0</span></div>
+                    <div>控制面板：<span id="panel-version">1.0.0</span></div>
+                    <div>内部测试版本</span></div>
+                    <div>不代表最终品质</span></div>
+                </div>
+            </div>
+
+            <!-- 客户端详情列表 -->
+            <div class="status-card" style="grid-column: 1 / -1;">
+                <div class="metric-header">
+                    <i class="fas fa-list-ul metric-icon"></i>
+                    <h3>客户端详情列表</h3>
+                </div>
+                <div class="client-table">
+                    <div class="table-header">
+                        <span>受控ID</span>
+                        <span>受控名称</span>
+                        <span>班级</span>
+                        <span>IP地址</span>
+                        <span>延迟</span>
+                        <span>状态</span>
+                    </div>
+                    <div id="client-details">
+                        <div class="table-row">
+                            <span>010001</span>
+                            <span>IFLY-PC</span>
+                            <span>九年级十二班</span>
+                            <span>192.0.12.87</span>
+                            <span>4ms</span>
+                            <span>连接正常</span>
+                        </div>
+                        <div id="client-details">
+                            <div class="table-row">
+                                <span>019945</span>
+                                <span>SeeWo-9G6TR</span>
+                                <span>九年级十一班</span>
+                                <span>-</span>
+                                <span>-</span>
+                                <span>异常离线</span>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 侧边栏交互逻辑
+        const sidebar = document.querySelector('.sidebar');
+        const accountArea = document.querySelector('.account-area');
+
+        // 用户信息加载
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = {
+                accountName: document.querySelector('.account-name'),
+                popupUsername: document.getElementById('popup-username'),
+                popupRole: document.getElementById('popup-role'),
+                popupIdentity: document.getElementById('popup-identity')
+            };
+
+            // 加载用户信息
+            fetch('/api/user-info')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.json();
+                })
+                .then(data => {
+                    Object.entries(elements).forEach(([key, el]) => {
+                        el.textContent = data[key] || 'ERROR';
+                        el.classList.toggle('error-text', !data[key]);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Object.values(elements).forEach(el => {
+                        el.textContent = 'ERROR';
+                        el.classList.add('error-text');
+                    });
+                });
+
+            // 启动系统状态轮询
+            updateSystemStatus();
+            setInterval(updateSystemStatus, 5000);
+        });
+
+        // 系统状态更新
+        function updateSystemStatus() {
+            fetch('/api/system-status')
+                .then(response => response.json())
+                .then(data => {
+                    // 更新CPU
+                    document.getElementById('cpu-progress').style.width = data.cpu + '%';
+                    document.getElementById('cpu-value').textContent = `${data.cpu}%`;
+
+                    // 更新内存
+                    document.getElementById('memory-progress').style.width = data.memory + '%';
+                    document.getElementById('memory-value').textContent = 
+                        `${data.memory}% (${data.usedMemory}GB / ${data.totalMemory}GB)`;
+
+                    // 更新版本信息
+                    document.getElementById('kernel-version').textContent = data.kernelVersion;
+
+                    // 更新客户端列表
+                    const container = document.getElementById('client-details');
+                    container.innerHTML = data.clients.map(client => `
+                        <div class="table-row">
+                            <span>${client.id}</span>
+                            <span>${client.name}</span>
+                            <span>${client.class}</span>
+                            <span>${client.ip}</span>
+                            <span>${client.latency}ms</span>
+                            <span>
+                                <span class="status-indicator ${client.online ? 'status-online' : 'status-offline'}"></span>
+                                ${client.online ? '在线' : '离线'}
+                            </span>
+                        </div>
+                    `).join('');
+                })
+                .catch(error => console.error('获取系统状态失败:', error));
+        }
+    </script>
+</body>
+</html>
