@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>冰核智慧课堂控制台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            display: flex;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 60px;
+            height: 100vh;
+            background: #1a73e8;
+            padding: 20px 10px;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .sidebar:hover {
+            width: 240px;
+        }
+
+        /* 主菜单项 */
+        .menu-item {
+            position: relative;
+            color: #fff;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .menu-item:hover {
+            background: #1557b0;
+        }
+
+        .menu-item i {
+            width: 30px;
+            font-size: 16px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        /* 二级菜单样式 */
+        .submenu {
+            display: none;
+            width: 100%;
+            background: #0d5abf;
+            border-radius: 4px;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            padding: 5px 0;
+            z-index: 1001;
+        }
+
+        .submenu.active {
+            display: block;
+        }
+
+        .submenu-item {
+            color: #fff;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+
+        .submenu-item:hover {
+            background: #1a73e8;
+        }
+
+        /* 账号区域 */
+        .account-area {
+            margin-top: auto;
+            position: relative;
+            padding: 20px 0;
+            color: #fff;
+        }
+
+        .account-popup {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            width: 200px;
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            padding: 15px;
+            display: none;
+            z-index: 1001;
+        }
+
+        .account-area:hover .account-popup {
+            display: block;
+        }
+
+        .popup-item {
+            margin: 10px 0;
+            color: #606266;
+        }
+
+        /* 右侧内容区 */
+        .content {
+            flex: 1;
+            margin-left: 60px;
+            min-height: 100vh;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: margin 0.3s ease;
+        }
+
+        .sidebar:hover ~ .content {
+            margin-left: 240px;
+        }
+
+        .error-text {
+            color: #ff4d4f !important;
+            font-weight: bold;
+        }
+
+        /* 设置菜单项 */
+        .settings-menu {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <!-- 总览 -->
+        <div class="menu-item" onclick="toggleSubmenu(this)">
+            <i class="fas fa-chart-line"></i>
+            总览
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='dashboard.html'">总览面板</div>
+                <div class="submenu-item" onclick="location.href='system-status.html'">系统状态</div>
+                <div class="submenu-item" onclick="location.href='dev-tools.html'">运维工具</div>
+            </div>
+        </div>
+
+        <!-- 课程 -->
+        <div class="menu-item" onclick="toggleSubmenu(this)">
+            <i class="fas fa-book-open"></i>
+            课程
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='timetable.html'">课程表</div>
+                <div class="submenu-item" onclick="location.href='adjust-course.html'">临时调课</div>
+                <div class="submenu-item" onclick="location.href='course-mgmt.html'">课程管理</div>
+            </div>
+        </div>
+
+        <!-- 考试 -->
+        <div class="menu-item" onclick="toggleSubmenu(this)">
+            <i class="fas fa-edit"></i>
+            考试
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='exam-booking.html'">考试预约</div>
+                <div class="submenu-item" onclick="location.href='exam-status.html'">考试状态</div>
+                <div class="submenu-item" onclick="location.href='score-analysis.html'">成绩分析</div>
+            </div>
+        </div>
+
+        <!-- 监控 -->
+        <div class="menu-item" onclick="toggleSubmenu(this)">
+            <i class="fas fa-video"></i>
+            监控
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='whiteboard-cam.html'">白板摄像头</div>
+                <div class="submenu-item" onclick="location.href='live-screen.html'">实时屏幕</div>
+                <div class="submenu-item" onclick="location.href='remote-ops.html'">远程操作</div>
+            </div>
+        </div>
+
+        <!-- 设置 -->
+        <div class="menu-item settings-menu" onclick="location.href='settings.html'">
+            <i class="fas fa-cog"></i>
+            设置
+        </div>
+
+        <!-- 账号区域 -->
+        <div class="account-area">
+            <div class="menu-item">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                    <div>当前账号</div>
+                    <div class="account-name">Loading...</div>
+                </div>
+            </div>
+            <div class="account-popup">
+                <div class="popup-item">用户名：<span id="popup-username">Loading...</span></div>
+                <div class="popup-item">权限：<span id="popup-role">Loading...</span></div>
+                <div class="popup-item">身份：<span id="popup-identity">Loading...</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="welcome">
+            <h1 style="color: #1a73e8; margin-bottom: 20px;">
+                <i class="fas fa-handshake" style="font-size: 2em; margin-bottom: 15px;"></i><br>
+                欢迎使用冰核智慧课堂生态系统控制端<br>
+                <span id="username">Loading...</span>
+            </h1>
+            <p style="color: #666;">请从左侧菜单选择要操作的功能</p>
+        </div>
+    </div>
+
+    <script>
+        // 二级菜单控制逻辑
+        let activeMenu = null;
+
+        function toggleSubmenu(menu) {
+            const submenu = menu.querySelector('.submenu');
+            
+            // 关闭其他菜单
+            document.querySelectorAll('.submenu').forEach(otherMenu => {
+                if (otherMenu !== submenu) {
+                    otherMenu.classList.remove('active');
+                }
+            });
+
+            // 切换当前菜单
+            submenu.classList.toggle('active');
+            activeMenu = submenu.classList.contains('active') ? submenu : null;
+        }
+
+        // 全局点击检测
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.menu-item')) {
+                document.querySelectorAll('.submenu').forEach(menu => {
+                    menu.classList.remove('active');
+                });
+                activeMenu = null;
+            }
+        });
+
+        // 用户数据加载
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = {
+                username: document.getElementById('username'),
+                accountName: document.querySelector('.account-name'),
+                popupUsername: document.getElementById('popup-username'),
+                popupRole: document.getElementById('popup-role'),
+                popupIdentity: document.getElementById('popup-identity')
+            };
+
+            fetch('/api/user-info')
+                .then(response => {
+                    if (!response.ok) throw new Error('网络请求失败');
+                    return response.json();
+                })
+                .then(data => {
+                    Object.entries(elements).forEach(([key, el]) => {
+                        el.textContent = data[key] || 'ERROR';
+                        el.classList.toggle('error-text', !data[key]);
+                    });
+                })
+                .catch(error => {
+                    console.error('错误:', error);
+                    Object.values(elements).forEach(el => {
+                        el.textContent = 'ERROR';
+                        el.classList.add('error-text');
+                    });
+                });
+        });
+    </script>
+</body>
+</html>
